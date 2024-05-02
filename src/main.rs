@@ -1,28 +1,19 @@
 mod ray;
+mod hitable;
+mod sphere;
 
-use crate::ray::Ray;
+use std::f32;
+use std::io::{ stderr, Write };
 use nalgebra::Vector3;
-use std::io::{stderr, Write};
+use crate::ray::Ray;
+use crate::hitable::{ Hitable, HitableList };
+use crate::sphere::Sphere;
 
-fn hit_sphere(ray: &Ray, center: &Vector3<f32>, radius: f32) -> Option<f32> {
-    let oc = ray.origin() - center;
-    let a = ray.direction().dot(&ray.direction());
-    let b = 2.0 * oc.dot(&ray.direction());
-    let c = oc.dot(&oc) - radius.powi(2);
-    let discriminant = b.powi(2) - 4.0 * a * c;
-    if discriminant < 0.0 {
-        None
+fn color(ray: &Ray, world: &HitableList) -> Vector3<f32> {
+    if let Some(hit) = world.hit(ray, 0.0, f32::MAX) {
+        0.5 * hit.normal.add_scalar(1.0)
     } else {
-        Some((-b - discriminant.sqrt()) / (2.0 * a))
-    }
-}
-
-fn color(ray: &Ray) -> Vector3<f32> {
-    if let Some(t) = hit_sphere(ray, &Vector3::new(0.0, 0.0, -1.0), 0.5) {
-        let n = (ray.at(t) - Vector3::new(0.0, 0.0, -1.0)).normalize();
-        0.5 * n.add_scalar(1.0)
-    } else {
-        let unit_direction = ray.direction().normalize();
+        let unit_direction = ray.d.normalize();
         let t = 0.5 * (unit_direction[1] + 1.0);
         (1.0 - t) * Vector3::new(1.0, 1.0, 1.0) + t * Vector3::new(0.5, 0.7, 1.0)
     }
@@ -56,9 +47,15 @@ fn main() {
         - viewport_v / 2.0;
     let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
+    // world
+    let world = HitableList::new(vec![
+        Box::new(Sphere::new(Vector3::new(0.0, 0.0, -1.0), 0.5)),
+        Box::new(Sphere::new(Vector3::new(0.0, -100.5, -1.0), 100.0))
+    ]);
+
     println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
     for j in 0..IMAGE_HEIGHT {
-        eprint!("\rScanlines remaining: {:3}", IMAGE_HEIGHT - j);
+        eprint!("\rScanlines remaining: {:3}", IMAGE_HEIGHT - j - 1);
         stderr().flush().unwrap();
         for i in 0..IMAGE_WIDTH {
             let pixel_center =
@@ -67,7 +64,7 @@ fn main() {
                 + (j as f32 * pixel_delta_v);
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction);
-            let col = color(&ray);
+            let col = color(&ray, &world);
             let ir = (255.99 * col[0]) as i32;
             let ig = (255.99 * col[1]) as i32;
             let ib = (255.99 * col[2]) as i32;
