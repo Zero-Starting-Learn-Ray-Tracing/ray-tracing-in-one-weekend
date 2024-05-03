@@ -25,8 +25,8 @@ impl Hitable for HitableList {
     fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<HitRecord> {
         let mut closest_so_far = t_max;
         let mut hit_anything: Option<HitRecord> = None;
-        for h in self.list.iter() {
-            if let Some(hit) = h.hit(ray, t_min, closest_so_far) {
+        for obj in self.list.iter() {
+            if let Some(hit) = obj.hit(ray, t_min, closest_so_far) {
                 closest_so_far = hit.t;
                 hit_anything = Some(hit);
             }

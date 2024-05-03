@@ -1,5 +1,5 @@
 use nalgebra::Vector3;
-// use crate::ray::Ray;
+use crate::ray::Ray;
 
 #[derive(Debug)]
 pub struct Camera {
@@ -41,5 +41,15 @@ impl Camera {
             pixel_delta_u,
             pixel_delta_v
         };
+    }
+
+    pub fn get_ray(&self, u: f32, v: f32) -> Ray {
+        let pixel_center =
+            self.pixel00_loc
+            + (u as f32 * self.pixel_delta_u)
+            + (v as f32 * self.pixel_delta_v);
+        let ray_direction = pixel_center - self.center;
+        
+        Ray::new(self.center, ray_direction)
     }
 }
