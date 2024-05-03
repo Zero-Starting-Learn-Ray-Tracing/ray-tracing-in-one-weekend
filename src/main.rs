@@ -34,7 +34,15 @@ fn main() {
     let mut rng = rand::thread_rng();
 
     // camera
-    let camera = Camera::new();
+    const IMAGE_WIDTH: u32 = 960;
+    const IMAGE_HEIGHT: u32 = 540;
+    let camera = Camera::new(
+        Vector3::new(-2.0, 2.0, 1.0),
+        Vector3::new(0.0, 0.0, -1.0),
+        Vector3::new(0.0, 1.0, 0.0),
+        90.0,
+        IMAGE_WIDTH as f32 / IMAGE_HEIGHT as f32
+    );
 
     // world
     let world = HitableList::new(vec![
@@ -65,19 +73,17 @@ fn main() {
         ))
     ]);
 
-    println!("P3\n{} {}\n255", Camera::IMAGE_WIDTH, Camera::IMAGE_HEIGHT);
-    for j in (0..Camera::IMAGE_HEIGHT).rev() {
-        eprint!("\rScanlines remaining: {:3}", Camera::IMAGE_HEIGHT - j);
+    println!("P3\n{} {}\n255", IMAGE_WIDTH, IMAGE_HEIGHT);
+    for j in (0..IMAGE_HEIGHT).rev() {
+        eprint!("\rScanlines remaining: {:3}", IMAGE_HEIGHT - j);
         stderr().flush().unwrap();
-        for i in 0..Camera::IMAGE_WIDTH {
+        for i in 0..IMAGE_WIDTH {
             let mut col = Vector3::new(0.0, 0.0, 0.0);
             for _ in 0..samples {
-                let ray = Camera::get_ray(
-                    &camera,
-                    i as f32 + rng.gen::<f32>(),
-                    j as f32 + rng.gen::<f32>()
-                );
-                col += color(&ray, &world, 4);
+                let u = (i as f32 + rng.gen::<f32>()) / IMAGE_WIDTH as f32;
+                let v = (j as f32 + rng.gen::<f32>()) / IMAGE_HEIGHT as f32;
+                let ray = camera.get_ray(u, v);
+                col += color(&ray, &world, 0);
             }
             col /= samples as f32;
             for c in col.iter_mut() { *c = c.sqrt(); }
