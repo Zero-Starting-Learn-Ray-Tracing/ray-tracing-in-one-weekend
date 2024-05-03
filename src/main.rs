@@ -36,12 +36,19 @@ fn main() {
     // camera
     const IMAGE_WIDTH: u32 = 960;
     const IMAGE_HEIGHT: u32 = 540;
+
+    let look_from = Vector3::new(3.0, 3.0, 2.0);
+    let look_at = Vector3::new(0.0, 0.0, -1.0);
+    let focus_dist = (look_from - look_at).magnitude();
+    let aperture = 2.0;
     let camera = Camera::new(
-        Vector3::new(-2.0, 2.0, 1.0),
-        Vector3::new(0.0, 0.0, -1.0),
+        look_from,
+        look_at,
         Vector3::new(0.0, 1.0, 0.0),
-        90.0,
-        IMAGE_WIDTH as f32 / IMAGE_HEIGHT as f32
+        20.0,
+        IMAGE_WIDTH as f32 / IMAGE_HEIGHT as f32,
+        aperture,
+        focus_dist
     );
 
     // world
