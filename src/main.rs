@@ -11,7 +11,7 @@ use rand::Rng;
 use crate::ray::Ray;
 use crate::camera::Camera;
 use crate::hitable::{ Hitable, HitableList };
-use crate::material::{ Lambertian, Metal };
+use crate::material::{ Lambertian, Metal, Dielectric };
 use crate::sphere::Sphere;
 
 fn color(ray: &Ray, world: &HitableList, depth: u32) -> Vector3<f32> {
@@ -38,10 +38,10 @@ fn main() {
 
     // world
     let world = HitableList::new(vec![
-        Box::new(Sphere::new(Vector3::new(0.0, 0.0, -1.0), 0.5, Lambertian::new(Vector3::new(0.8, 0.3, 0.3)))),
+        Box::new(Sphere::new(Vector3::new(0.0, 0.0, -1.0), 0.5, Lambertian::new(Vector3::new(0.1, 0.2, 0.5)))),
         Box::new(Sphere::new(Vector3::new(0.0, -100.5, -1.0), 100.0, Lambertian::new(Vector3::new(0.8, 0.8, 0.0)))),
-        Box::new(Sphere::new(Vector3::new(1.0, 0.0, -1.0), 0.5, Metal::new(Vector3::new(0.8, 0.6, 0.2), 1.0))),
-        Box::new(Sphere::new(Vector3::new(-1.0, 0.0, -1.0), 0.5, Metal::new(Vector3::new(0.8, 0.8, 0.8), 0.3)))
+        Box::new(Sphere::new(Vector3::new(1.0, 0.0, -1.0), 0.5, Metal::new(Vector3::new(0.8, 0.6, 0.2), 0.0))),
+        Box::new(Sphere::new(Vector3::new(-1.0, 0.0, -1.0), 0.5, Dielectric::new(1.5)))
     ]);
 
     println!("P3\n{} {}\n255", Camera::IMAGE_WIDTH, Camera::IMAGE_HEIGHT);
